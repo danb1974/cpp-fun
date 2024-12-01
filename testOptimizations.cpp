@@ -67,29 +67,53 @@ void testUpscaling3(std::vector<uint8_t> &src, std::vector<uint8_t> &dst) {
     uint8_t *dstRow1 = &dst[0];
     uint8_t *dstRow2 = &dst[1280];
 
-    for (int16_t row = 0; row < 400; row++) {
-        bool isFinalRow = (row == 400 - 1);
+    uint8_t pixel1;
+    uint8_t pixel2;
+    uint8_t pixel3;
+    uint8_t pixel4;
 
-        for (uint16_t col = 0; col < 640; col++) {
-            bool isFinalCol = (col == 640 - 1);
-
-            uint8_t pixel1 = *srcRow1;
-            uint8_t pixel2 = isFinalCol ? pixel1 : *(srcRow1 + 1);
-            uint8_t pixel3 = isFinalRow ? pixel1 : *srcRow2;
-            uint8_t pixel4 = (isFinalRow || isFinalCol) ? pixel1 : *(srcRow2 + 1);
+    for (int16_t row = 0; row < 400 - 1; row++) {
+        for (uint16_t col = 0; col < 640 - 1; col++) {
+            pixel1 = *srcRow1++;
+            pixel2 = *srcRow1++;
+            pixel3 = *srcRow2++;
+            pixel4 = *srcRow2++;
 
             *dstRow1++ = pixel1;
             *dstRow1++ = (pixel1 + pixel2) / 2;
             *dstRow2++ = (pixel1 + pixel3) / 2;
             *dstRow2++ = (pixel1 + pixel2 + pixel3 + pixel4) / 4;
-
-            srcRow1++;
-            srcRow2++;
         }
+
+        // not last row but last col
+        pixel1 = *srcRow1++;
+        pixel3 = *srcRow2++;
+        *dstRow1++ = pixel1;
+        *dstRow1++ = pixel1;
+        *dstRow2++ = pixel3;
+        *dstRow2++ = (pixel1 + pixel3) / 2;
 
         dstRow1 += 1280;
         dstRow2 += 1280;
     }
+
+    // last row but not last col
+    for (uint16_t col = 0; col < 640 - 1; col++) {
+        pixel1 = *srcRow1++;
+        pixel2 = *srcRow1++;
+
+        *dstRow1++ = pixel1;
+        *dstRow1++ = (pixel1 + pixel2) / 2;
+        *dstRow2++ = pixel1;
+        *dstRow2++ = (pixel1 + pixel2) / 2;
+    }
+
+    // last row last col
+    pixel1 = *srcRow1++;
+    *dstRow1++ = pixel1;
+    *dstRow1++ = pixel1;
+    *dstRow2++ = pixel1;
+    *dstRow2++ = pixel1;
 }
 
 //
