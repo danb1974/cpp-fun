@@ -75,9 +75,9 @@ void testUpscaling3(std::vector<uint8_t> &src, std::vector<uint8_t> &dst) {
     for (int16_t row = 0; row < 400 - 1; row++) {
         for (uint16_t col = 0; col < 640 - 1; col++) {
             pixel1 = *srcRow1++;
-            pixel2 = *srcRow1++;
+            pixel2 = *srcRow1;
             pixel3 = *srcRow2++;
-            pixel4 = *srcRow2++;
+            pixel4 = *srcRow2;
 
             *dstRow1++ = pixel1;
             *dstRow1++ = (pixel1 + pixel2) / 2;
@@ -90,7 +90,7 @@ void testUpscaling3(std::vector<uint8_t> &src, std::vector<uint8_t> &dst) {
         pixel3 = *srcRow2++;
         *dstRow1++ = pixel1;
         *dstRow1++ = pixel1;
-        *dstRow2++ = pixel3;
+        *dstRow2++ = (pixel1 + pixel3) / 2;
         *dstRow2++ = (pixel1 + pixel3) / 2;
 
         dstRow1 += 1280;
@@ -100,7 +100,7 @@ void testUpscaling3(std::vector<uint8_t> &src, std::vector<uint8_t> &dst) {
     // last row but not last col
     for (uint16_t col = 0; col < 640 - 1; col++) {
         pixel1 = *srcRow1++;
-        pixel2 = *srcRow1++;
+        pixel2 = *srcRow1;
 
         *dstRow1++ = pixel1;
         *dstRow1++ = (pixel1 + pixel2) / 2;
