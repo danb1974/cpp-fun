@@ -29,10 +29,10 @@ void testUpscaling1(std::vector<uint8_t> &src, std::vector<uint8_t> &dst) {
 }
 
 void testUpscaling2(std::vector<uint8_t> &src, std::vector<uint8_t> &dst) {
-    __restrict uint8_t *srcRow1 = &src[0];
-    __restrict uint8_t *srcRow2 = &src[640];
-    __restrict uint8_t *dstRow1 = &dst[0];
-    __restrict uint8_t *dstRow2 = &dst[1280];
+    uint8_t *srcRow1 = &src[0];
+    uint8_t *srcRow2 = &src[640];
+    uint8_t *dstRow1 = &dst[0];
+    uint8_t *dstRow2 = &dst[1280];
 
     for (int16_t row = 0; row < 400; row++) {
         bool isFinalRow = (row == 400 - 1);
@@ -54,6 +54,37 @@ void testUpscaling2(std::vector<uint8_t> &src, std::vector<uint8_t> &dst) {
             srcRow2++;
             dstRow1 += 2;
             dstRow2 += 2;
+        }
+
+        dstRow1 += 1280;
+        dstRow2 += 1280;
+    }
+}
+
+void testUpscaling3(std::vector<uint8_t> &src, std::vector<uint8_t> &dst) {
+    uint8_t *srcRow1 = &src[0];
+    uint8_t *srcRow2 = &src[640];
+    uint8_t *dstRow1 = &dst[0];
+    uint8_t *dstRow2 = &dst[1280];
+
+    for (int16_t row = 0; row < 400; row++) {
+        bool isFinalRow = (row == 400 - 1);
+
+        for (uint16_t col = 0; col < 640; col++) {
+            bool isFinalCol = (col == 640 - 1);
+
+            uint8_t pixel1 = *srcRow1;
+            uint8_t pixel2 = isFinalCol ? pixel1 : *(srcRow1 + 1);
+            uint8_t pixel3 = isFinalRow ? pixel1 : *srcRow2;
+            uint8_t pixel4 = (isFinalRow || isFinalCol) ? pixel1 : *(srcRow2 + 1);
+
+            *dstRow1++ = pixel1;
+            *dstRow1++ = (pixel1 + pixel2) / 2;
+            *dstRow2++ = (pixel1 + pixel3) / 2;
+            *dstRow2++ = (pixel1 + pixel2 + pixel3 + pixel4) / 4;
+
+            srcRow1++;
+            srcRow2++;
         }
 
         dstRow1 += 1280;
@@ -87,6 +118,12 @@ int main() {
     start();
     for (int i = 0; i < 1000; i++) {
         testUpscaling2(inputImage, outputImage);
+    }
+    stop();
+
+    start();
+    for (int i = 0; i < 1000; i++) {
+        testUpscaling3(inputImage, outputImage);
     }
     stop();
 
