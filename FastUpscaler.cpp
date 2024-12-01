@@ -1,9 +1,10 @@
 #include <iostream>
 #include <vector>
 #include <chrono>
+#include <opencv2/opencv.hpp>
 
-std::vector<uint8_t> inputImage(640 * 400);
-std::vector<uint8_t> outputImage(1280 * 800);
+std::vector<uint8_t> inputImage(640 * 400, 0);
+std::vector<uint8_t> outputImage(1280 * 800, 0);
 
 uint16_t off(uint16_t row, uint16_t col) {
     return row * 640 + col;
@@ -133,23 +134,40 @@ void stop() {
 int main() {
     std::cout << "Hello!" << std::endl;
 
-    start();
-    for (int i = 0; i < 1000; i++) {
-        testUpscaling1(inputImage, outputImage);
-    }
-    stop();
+    cv::Mat img = cv::imread("data/abbey_road_zebra_640_400.jpg", cv::IMREAD_GRAYSCALE);
+    std::memcpy(inputImage.data(), img.data, inputImage.size());
 
-    start();
-    for (int i = 0; i < 1000; i++) {
-        testUpscaling2(inputImage, outputImage);
-    }
-    stop();
+    // start();
+    // for (int i = 0; i < 1000; i++) {
+    //     testUpscaling1(inputImage, outputImage);
+    // }
+    // stop();
 
-    start();
-    for (int i = 0; i < 1000; i++) {
-        testUpscaling3(inputImage, outputImage);
-    }
-    stop();
+    // start();
+    // for (int i = 0; i < 1000; i++) {
+    //     testUpscaling2(inputImage, outputImage);
+    // }
+    // stop();
+
+    // start();
+    // for (int i = 0; i < 1000; i++) {
+    //     testUpscaling3(inputImage, outputImage);
+    // }
+    // stop();
+
+    cv::Mat inputMat = cv::Mat(400, 640, CV_8UC1, inputImage.data());
+    cv::imshow("Input Image", inputMat);
+
+    testUpscaling2(inputImage, outputImage);
+    cv::Mat outputMat2 = cv::Mat(800, 1280, CV_8UC1, outputImage.data());
+    cv::imshow("Output Image 2", outputMat2);
+
+    testUpscaling3(inputImage, outputImage);
+    cv::Mat outputMat3 = cv::Mat(800, 1280, CV_8UC1, outputImage.data());
+    cv::imshow("Output Image 3", outputMat3);
+
+    cv::waitKey(0);
+    cv::destroyAllWindows();
 
     return 0;
 }
