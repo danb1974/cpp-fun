@@ -1,37 +1,17 @@
 #include <iostream>
 #include <vector>
+#include <chrono>
 
 std::vector<uint8_t> inputImage(640 * 400);
-std::vector<uint8_t> outputImage(640 * 400);
-std::vector<uint8_t> outputImageBig(1280 * 800);
+std::vector<uint8_t> outputImage(1280 * 800);
 
 uint16_t off(uint16_t row, uint16_t col) {
     return row * 640 + col;
 }
 
-void testFunction1(__restrict std::vector<uint8_t> &src, __restrict std::vector<uint8_t> &dst) {
-    for (uint16_t row = 0; row < 480; row++) {
-        for (uint16_t col = 0; col < 640; col++) {
-            dst[off(row, col)] = 256 - src[off(row, col)];
-        }
-    }
-}
-
-void testFunction2(__restrict std::vector<uint8_t> &src, __restrict std::vector<uint8_t> &dst) {
-    uint8_t *srcPtr = &src[0];
-    uint8_t *dstPtr = &dst[0];
-    for (uint16_t row = 0; row < 480; row++) {
-        for (uint16_t col = 0; col < 640; col++) {
-            *dstPtr = 256 - *srcPtr;
-            srcPtr++;
-            dstPtr++;
-        }
-    }
-}
-
-void testUpscaling1(__restrict std::vector<uint8_t> &src, __restrict std::vector<uint8_t> &dst) {
-    for (int16_t row = 0; row < 480; row++) {
-        bool isFinalRow = row == 480 - 1;
+void testUpscaling1(std::vector<uint8_t> &src, std::vector<uint8_t> &dst) {
+    for (int16_t row = 0; row < 400; row++) {
+        bool isFinalRow = row == 400 - 1;
         for (uint16_t col = 0; col < 640; col++) {
             bool isFinalCol = col == 640 - 1;
 
@@ -48,16 +28,17 @@ void testUpscaling1(__restrict std::vector<uint8_t> &src, __restrict std::vector
     }
 }
 
-void testUpscaling2(__restrict std::vector<uint8_t> &src, __restrict std::vector<uint8_t> &dst) {
-    uint8_t *srcRow1 = &src[0];
-    uint8_t *srcRow2 = &src[640];
-    uint8_t *dstRow1 = &dst[0];
-    uint8_t *dstRow2 = &dst[1280];
+void testUpscaling2(std::vector<uint8_t> &src, std::vector<uint8_t> &dst) {
+    __restrict uint8_t *srcRow1 = &src[0];
+    __restrict uint8_t *srcRow2 = &src[640];
+    __restrict uint8_t *dstRow1 = &dst[0];
+    __restrict uint8_t *dstRow2 = &dst[1280];
 
-    for (int16_t row = 0; row < 480; row++) {
-        bool isFinalRow = row == 480 - 1;
+    for (int16_t row = 0; row < 400; row++) {
+        bool isFinalRow = (row == 400 - 1);
+
         for (uint16_t col = 0; col < 640; col++) {
-            bool isFinalCol = col == 640 - 1;
+            bool isFinalCol = (col == 640 - 1);
 
             uint8_t pixel1 = *srcRow1;
             uint8_t pixel2 = isFinalCol ? pixel1 : *(srcRow1 + 1);
@@ -74,6 +55,7 @@ void testUpscaling2(__restrict std::vector<uint8_t> &src, __restrict std::vector
             dstRow1 += 2;
             dstRow2 += 2;
         }
+
         dstRow1 += 1280;
         dstRow2 += 1280;
     }
@@ -81,7 +63,7 @@ void testUpscaling2(__restrict std::vector<uint8_t> &src, __restrict std::vector
 
 //
 
-std::__1::chrono::steady_clock::time_point startTime;
+auto startTime = std::chrono::high_resolution_clock::now();
 
 void start() {
     startTime = std::chrono::high_resolution_clock::now();
@@ -96,27 +78,15 @@ void stop() {
 int main() {
     std::cout << "Hello!" << std::endl;
 
-    // start();
-    // for (int i = 0; i < 1000; i++) {
-    //     testFunction1(inputImage, outputImage);
-    // }
-    // stop();
-
-    // start();
-    // for (int i = 0; i < 1000; i++) {
-    //     testFunction2(inputImage, outputImage);
-    // }
-    // stop();
-
     start();
     for (int i = 0; i < 1000; i++) {
-        testUpscaling1(inputImage, outputImageBig);
+        testUpscaling1(inputImage, outputImage);
     }
     stop();
 
     start();
     for (int i = 0; i < 1000; i++) {
-        testUpscaling2(inputImage, outputImageBig);
+        testUpscaling2(inputImage, outputImage);
     }
     stop();
 

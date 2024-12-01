@@ -5,7 +5,7 @@ CXX = g++
 CXXFLAGS = -std=c++17 -O3 -Wall -Wextra -pedantic
 
 # Source files
-SRCS = *.cpp
+SRCS = TestOptimizations.cpp
 
 # Object files
 OBJS = $(SRCS:.cpp=.o)
