@@ -3,7 +3,9 @@ CXXFLAGS = -std=c++17 -O3 -Wall -Wextra -pedantic
 
 all: FastUpscaler TestObjectLyfecycle
 
-# Link object files to create the executable
+cmake: *.cpp
+	@cmake --build build/ --config Release --target all -j 6
+
 FastUpscaler: FastUpscaler.cpp
 	$(CXX) $(CXXFLAGS) -o build/FastUpscaler FastUpscaler.cpp
 
